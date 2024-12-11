@@ -26,23 +26,27 @@ async function sendBridgeTransaction(providers:string , privateKey: string , tok
     const skyaToken = new ethers.Contract(tokenContract, ERC20_ABI, wallet);
     const bridgeContract = new ethers.Contract(bridgeAdress, BRIDGE_ABI, wallet);
     const amountToBridge = ethers.parseUnits('1.0', 18);
+
+    // Sending approval transaction for the bridge
     const approveBridgeTx = await skyaToken.approve(bridgeAdress, amountToBridge);
-    console.log('Транзакція схвалення для бриджа відправлена:', approveBridgeTx.hash);
+    console.log('Approval transaction for the bridge sent:', approveBridgeTx.hash);
     await approveBridgeTx.wait();
-    console.log('Транзакція схвалення для бриджа підтверджена');
+    console.log('Approval transaction for the bridge confirmed');
+
+    // Sending bridge transaction
     const bridgeTx = await bridgeContract.bridgeTokens(tokenContract, amountToBridge, recipientAddress);
-    console.log('Транзакція відправлена на бридж:', bridgeTx.hash);
+    console.log('Transaction sent to the bridge:', bridgeTx.hash);
     const bridgeReceipt = await bridgeTx.wait();
-    console.log('Транзакція підтверджена:', bridgeReceipt.transactionHash);
-    console.log(`Токени відправлено на адресу ${recipientAddress} у мережі Base`);
+    console.log('Transaction confirmed:', bridgeReceipt.transactionHash);
+    console.log(`Tokens have been sent to the address ${recipientAddress} on the Base network`);
   } catch (error) {
-    console.error('Помилка при відправці транзакції:', error);
+    console.error('Error while sending transaction:', error);
   }
 }
 
 if(ETH_PROVIDER_URL && PRIVATE_KEY){
-sendBridgeTransaction(ETH_PROVIDER_URL , PRIVATE_KEY , SKYA_CONTRACT_ADDRESS , BRIDGE_CONTRACT_ADDRESS , RECIPENT_ADDRESS).catch(console.error);
+  sendBridgeTransaction(ETH_PROVIDER_URL , PRIVATE_KEY , SKYA_CONTRACT_ADDRESS , BRIDGE_CONTRACT_ADDRESS , RECIPENT_ADDRESS).catch(console.error);
 }
 else {
-  console.log('Нажаль у вас выдсутный приватний ключ або адресса провайдера')
+  console.log('Unfortunately, the private key or provider address is missing');
 }
